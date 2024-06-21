@@ -21,7 +21,7 @@ const Home = () => {
   const [gameWon, setGameWon] = useState(false);
   const [score, setScore] = useState(0);
   const [isPaused, setIsPaused] = useState(false); // 一時停止状態を管理するステート
-  const paddleWidth = 75;
+  const paddleWidth = 100;
   const paddleHeight = 10;
   const canvasHeight = 600;
   const canvasWidth = 1280;
@@ -31,8 +31,8 @@ const Home = () => {
     setPaddleX((canvasWidth - paddleWidth) / 2);
     setBallX(400);
     setBallY(300);
-    setBallDX(2);
-    setBallDY(2);
+    setBallDX(4);
+    setBallDY(4);
     setScore(0);
     setGameOver(false);
     setGameWon(false);
