@@ -17,6 +17,8 @@ const Home = () => {
   const [ballDX, setBallDX] = useState(2);
   const [ballDY, setBallDY] = useState(2);
   const [blocks, setBlocks] = useState<Block[]>([]);
+  const [gameOver, setGameOver] = useState(false);
+  const [gameWon, setGameWon] = useState(false);
   const paddleWidth = 75;
   const paddleHeight = 10;
   const canvasHeight = 600;
@@ -85,6 +87,7 @@ const Home = () => {
                 newY = c + ballDY;
               } else {
                 clearInterval(interval);
+                setGameOver(true);
                 alert('Game Over');
               }
             }
@@ -107,6 +110,12 @@ const Home = () => {
               return block;
             }),
           );
+
+          if (blocks.every((block) => !block.visible)) {
+            clearInterval(interval);
+            setGameWon(true);
+            alert('Win');
+          }
 
           ctx.clearRect(0, 0, canvasWidth, canvasHeight);
 
@@ -145,6 +154,8 @@ const Home = () => {
     paddleHeight,
     ballRadius,
     blocks,
+    gameOver,
+    gameWon,
   ]);
 
   return (
