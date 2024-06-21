@@ -11,7 +11,7 @@ type Block = {
 
 const Home = () => {
   const canvasRef = useRef<HTMLCanvasElement>(null);
-  const [paddleX, setPaddleX] = useState((800 - 75) / 2);
+  const [paddleX, setPaddleX] = useState((1200 - 75) / 2);
   const [ballX, setBallX] = useState(400);
   const [ballY, setBallY] = useState(300);
   const [ballDX, setBallDX] = useState(2);
@@ -20,10 +20,11 @@ const Home = () => {
   const [gameOver, setGameOver] = useState(false);
   const [gameWon, setGameWon] = useState(false);
   const [score, setScore] = useState(0);
+  const [isPaused, setIsPaused] = useState(false); // 一時停止状態を管理するステート
   const paddleWidth = 75;
   const paddleHeight = 10;
   const canvasHeight = 600;
-  const canvasWidth = 800;
+  const canvasWidth = 1280;
   const ballRadius = 10;
 
   const initializeGame = useCallback(() => {
@@ -35,10 +36,11 @@ const Home = () => {
     setScore(0);
     setGameOver(false);
     setGameWon(false);
+    setIsPaused(false);
 
     const rows = 5;
-    const cols = 10;
-    const blockWidth = 70;
+    const cols = 13;
+    const blockWidth = 84;
     const blockHeight = 20;
     const padding = 10;
     const offsetTop = 30;
@@ -65,6 +67,8 @@ const Home = () => {
         setPaddleX((c) => Math.max(c - 20, 0));
       } else if (event.key === 'ArrowRight') {
         setPaddleX((c) => Math.min(c + 20, canvasWidth - paddleWidth));
+      } else if (event.key === ' ') {
+        setIsPaused((prev) => !prev); // スペースキーで一時停止/再開を切り替え
       }
     };
 
@@ -77,7 +81,7 @@ const Home = () => {
 
   useEffect(() => {
     const canvas = canvasRef.current;
-    if (canvas && !gameOver && !gameWon) {
+    if (canvas && !gameOver && !gameWon && !isPaused) {
       const ctx = canvas.getContext('2d');
       if (ctx) {
         const interval = setInterval(() => {
@@ -183,11 +187,13 @@ const Home = () => {
     gameWon,
     score,
     initializeGame,
+    isPaused, // isPaused を依存配列に追加
   ]);
 
   return (
     <div className="Home">
-      <canvas ref={canvasRef} width={800} height={600} className={styles.canvas} />
+      <canvas ref={canvasRef} width={1280} height={600} className={styles.canvas} />
+      {isPaused && <div className={styles.overlay}>Paused</div>} {/* 一時停止中に表示 */}
     </div>
   );
 };
