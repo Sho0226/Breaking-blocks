@@ -1,6 +1,14 @@
 import { useEffect, useRef, useState } from 'react';
 import styles from './index.module.css';
 
+type Block = {
+  x: number;
+  y: number;
+  width: number;
+  height: number;
+  visible: boolean;
+};
+
 const Home = () => {
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const [paddleX, setPaddleX] = useState((800 - 75) / 2);
@@ -8,11 +16,32 @@ const Home = () => {
   const [ballY, setBallY] = useState(300);
   const [ballDX, setBallDX] = useState(2);
   const [ballDY, setBallDY] = useState(2);
+  const [blocks, setBlocks] = useState<Block[]>([]);
   const paddleWidth = 75;
   const paddleHeight = 10;
   const canvasHeight = 600;
   const canvasWidth = 800;
   const ballRadius = 10;
+
+  useEffect(() => {
+    const rows = 5;
+    const cols = 10;
+    const blockWidth = 70;
+    const blockHeight = 20;
+    const padding = 10;
+    const offsetTop = 30;
+    const offsetLeft = 35;
+
+    const initialBlocks: Block[] = [];
+    for (let row = 0; row < rows; row++) {
+      for (let col = 0; col < cols; col++) {
+        const x = col * (blockWidth + padding) + offsetLeft;
+        const y = row * (blockHeight + padding) + offsetTop;
+        initialBlocks.push({ x, y, width: blockWidth, height: blockHeight, visible: true });
+      }
+    }
+    setBlocks(initialBlocks);
+  }, []);
 
   useEffect(() => {
     const handlekeyDown = (event: KeyboardEvent) => {
@@ -75,6 +104,13 @@ const Home = () => {
           ctx.fillStyle = 'white';
           ctx.fill();
           ctx.closePath();
+
+          blocks.forEach((block) => {
+            if (block.visible) {
+              ctx.fillStyle = 'blue';
+              ctx.fillRect(block.x, block.y, block.width, block.height);
+            }
+          });
         }, 10);
 
         return () => clearInterval(interval);
@@ -91,6 +127,7 @@ const Home = () => {
     paddleWidth,
     paddleHeight,
     ballRadius,
+    blocks,
   ]);
 
   return (
