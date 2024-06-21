@@ -91,6 +91,23 @@ const Home = () => {
             return newY;
           });
 
+          setBlocks((c) =>
+            c.map((block) => {
+              if (block.visible) {
+                if (
+                  ballX > block.x &&
+                  ballX < block.x + block.width &&
+                  ballY > block.y &&
+                  ballY < block.y + block.height
+                ) {
+                  setBallDY(-ballDY);
+                  return { ...block, visible: false };
+                }
+              }
+              return block;
+            }),
+          );
+
           ctx.clearRect(0, 0, canvasWidth, canvasHeight);
 
           ctx.fillStyle = 'black';
