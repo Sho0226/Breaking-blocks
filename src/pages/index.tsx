@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from 'react';
+import { useEffect, useRef, useState, useCallback } from 'react';
 import styles from './index.module.css';
 
 type Block = {
@@ -19,13 +19,23 @@ const Home = () => {
   const [blocks, setBlocks] = useState<Block[]>([]);
   const [gameOver, setGameOver] = useState(false);
   const [gameWon, setGameWon] = useState(false);
+  const [score, setScore] = useState(0);
   const paddleWidth = 75;
   const paddleHeight = 10;
   const canvasHeight = 600;
   const canvasWidth = 800;
   const ballRadius = 10;
 
-  useEffect(() => {
+  const initializeGame = useCallback(() => {
+    setPaddleX((canvasWidth - paddleWidth) / 2);
+    setBallX(400);
+    setBallY(300);
+    setBallDX(2);
+    setBallDY(2);
+    setScore(0);
+    setGameOver(false);
+    setGameWon(false);
+
     const rows = 5;
     const cols = 10;
     const blockWidth = 70;
@@ -43,10 +53,14 @@ const Home = () => {
       }
     }
     setBlocks(initialBlocks);
-  }, []);
+  }, [canvasWidth, paddleWidth]);
 
   useEffect(() => {
-    const handlekeyDown = (event: KeyboardEvent) => {
+    initializeGame();
+  }, [initializeGame]);
+
+  useEffect(() => {
+    const handleKeyDown = (event: KeyboardEvent) => {
       if (event.key === 'ArrowLeft') {
         setPaddleX((c) => Math.max(c - 20, 0));
       } else if (event.key === 'ArrowRight') {
@@ -54,17 +68,17 @@ const Home = () => {
       }
     };
 
-    window.addEventListener('keydown', handlekeyDown);
+    window.addEventListener('keydown', handleKeyDown);
 
     return () => {
-      window.removeEventListener('keydown', handlekeyDown);
+      window.removeEventListener('keydown', handleKeyDown);
     };
   }, [canvasWidth, paddleWidth]);
 
   useEffect(() => {
     const canvas = canvasRef.current;
-    if (canvas) {
-      const ctx = canvas?.getContext('2d');
+    if (canvas && !gameOver && !gameWon) {
+      const ctx = canvas.getContext('2d');
       if (ctx) {
         const interval = setInterval(() => {
           setBallX((c) => {
@@ -89,13 +103,15 @@ const Home = () => {
                 clearInterval(interval);
                 setGameOver(true);
                 alert('Game Over');
+                initializeGame(); // ゲームオーバー時にリセット
               }
             }
             return newY;
           });
 
-          setBlocks((c) =>
-            c.map((block) => {
+          // ブロックとの衝突判定
+          setBlocks((prevBlocks) =>
+            prevBlocks.map((block) => {
               if (block.visible) {
                 if (
                   ballX > block.x &&
@@ -104,6 +120,7 @@ const Home = () => {
                   ballY < block.y + block.height
                 ) {
                   setBallDY(-ballDY);
+                  setScore((prevScore) => prevScore + 10);
                   return { ...block, visible: false };
                 }
               }
@@ -111,10 +128,12 @@ const Home = () => {
             }),
           );
 
+          // 勝利条件のチェック
           if (blocks.every((block) => !block.visible)) {
             clearInterval(interval);
             setGameWon(true);
-            alert('Win');
+            alert('You Win!');
+            initializeGame(); // ゲームクリア時にもリセット
           }
 
           ctx.clearRect(0, 0, canvasWidth, canvasHeight);
@@ -131,6 +150,12 @@ const Home = () => {
           ctx.fill();
           ctx.closePath();
 
+          // スコアを表示
+          ctx.fillStyle = 'white';
+          ctx.font = '16px Arial';
+          ctx.fillText(`Score: ${score}`, 8, 20);
+
+          // ブロックを描画
           blocks.forEach((block) => {
             if (block.visible) {
               ctx.fillStyle = 'blue';
@@ -156,6 +181,8 @@ const Home = () => {
     blocks,
     gameOver,
     gameWon,
+    score,
+    initializeGame,
   ]);
 
   return (
