@@ -6,7 +6,7 @@ export default function Document() {
       <Head>
         <title>Breaking-blocks </title>
         <meta name="description" content="Breaking-blocks " />
-        <link rel="icon" href="favicon.ico" />
+        <link rel="icon" href="favicon.png" />
       </Head>
       <body>
         <Main />
